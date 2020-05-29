@@ -1,10 +1,5 @@
 #!/bin/bash  
 
-# LAUNCH CMD CONFIG FOR PEGASUS FRONTEND
-# enters the command to launch an emulator specified in cores.txt
-# into the metadata file (in cases where the config file does not
-# work in Skyscraper, or you don't want to run it again)
-
 IFS=$'\n'
 
 INPUT=/tmp/menu.sh.$$
@@ -12,19 +7,13 @@ OUTPUT=/tmp/output.sh.$$
 
 trap "rm $OUTPUT; rm $INPUT; exit" SIGHUP SIGINT SIGTERM
 
-## DEFAULT FILE LOCATIONS ##
-declare MD_PATH="/home/$USER/Games/roms"
+## VARS ##
+declare ROM_PATH="/home/$USER/Games/roms"
 declare CMD_PATH="/home/$USER/Games/emulator_files/cores.txt"
 declare LR_PATH="/home/$USER/.config/retroarch"
-declare -a ALL_CORES=$(ls "$LR_PATH"/cores/*.so); 
-declare PLATFORM="none"
-declare CORE="none"
-
-## PLATFORM ID AND NAME ASSOCIATIVE ARRAY##
+declare -a ALL_CORES=$(ls --quoting-style=shell "$LR_PATH"/cores/*.so);
 declare -a DIR=(`cat $CMD_PATH | cut -d':' -f 1`)
 declare -A SYS_ID
-
-## SAVED CMDS ARRAY ##
 declare -a CMD=(`cat $CMD_PATH | cut -d':' -f 3`); 
 
 ## HELP AND INFO MESSAGES ##
@@ -65,7 +54,7 @@ menu()
 
 	done
 
-	local MENU=(dialog --title "$2" --menu "$3" 0 0 0 )
+	local MENU=(dialog --title "$2" --cancel-label "Back" --menu "$3" 0 0 0 )
 	local SELECTIONS=$("${MENU[@]}" "${OPTS[@]}" 2>&1 >/dev/tty)
 	
 	for SELECT in $SELECTIONS; do
@@ -87,27 +76,51 @@ menu()
 set_cores()
 {
 
-	echo "not quite ready"
+	local PLATFORM="none"
+	local CORE="none"
+	local game_specific=$1
 
-#                P)
-#					menu "PLATFORM" \
-#						 "SYSTEM SELECTION" \
-#						 "please select the system to configure:" \
-#						 ${DIR[@]}
-#					;;
-#
-#				C)
-#					if [[ $PLATFORM != "none" ]]; then 
-#						eval "local -a CORES=($(get_cores $PLATFORM))"
-#						menu "CORE" \
-#							"EMULATOR SELECTION" \
-#							"select a default emulator for $PLATFORM:" \
-#							${CORES[@]}
-#						else 
-#							dialog --msgbox "You have not set a system yet." 6 20 
-#						fi
-#					;;
+	menu "PLATFORM" \
+		 "SYSTEM SELECTION" \
+		 "please select the system to configure:" \
+		 ${DIR[@]}
 
+	if [[ $PLATFORM != "none" ]]; then
+
+		if [[ $game_specific -ne 0 ]]; then
+
+			GAMES=($(ls $ROM_PATH/$PLATFORM))
+
+			echo ${GAMES[@]}
+
+			sleep 3
+
+			local GAME="none"
+
+			menu "GAME" \
+				 "GAME SELECTION" \
+				 "please select the game to configure:" \
+				 ${GAMES[@]}
+
+		fi
+		
+		eval "local -a CORES=($(get_cores $PLATFORM))"
+
+		if [[ ${#CORES[@]} -gt 0 ]]; then 
+
+			menu "CORE" \
+				"EMULATOR SELECTION" \
+				"select a default emulator for $PLATFORM:" \
+				${CORES[@]}
+
+		else 
+	
+			dialog --msgbox "No command set." 6 30 
+	
+		fi
+
+	fi
+	
 }
 
 # gets all cores for a specific platform.
@@ -135,7 +148,22 @@ get_cores()
 
 }
 
-show_cmds()
+get_games()
+{
+
+	local N=0
+
+	for I in $(ls --quoting-style=shell-escape-always $ROM_PATH/$1); do 
+
+		echo -e "$I\n"
+
+	done
+	
+	echo ${GAMES[@]}
+
+}
+
+get_cmds()
 {
 
     local I
@@ -172,12 +200,12 @@ set_cmds()
             printf "%-15s %s\n" "${DIR[$I]}" "${CMD[$I]}"
             
             # make a backup of the existing file.
-            cp "$MD_PATH/${DIR[$I]}/metadata.pegasus.txt" \
-				"$MD_PATH/${DIR[$I]}/.metadata.pegasus.txt.bak"
+            cp "$ROM_PATH/${DIR[$I]}/metadata.pegasus.txt" \
+				"$ROM_PATH/${DIR[$I]}/.metadata.pegasus.txt.bak"
             
             # set the command in metadata.pegasus.txt
             sed -i -e 's,command: .*,command: '"${CMD[$I]}"',' \
-				"$MD_PATH/${DIR[$I]}/metadata.pegasus.txt"
+				"$ROM_PATH/${DIR[$I]}/metadata.pegasus.txt"
         
         else
     
@@ -198,7 +226,8 @@ while true; do
 	dialog --clear \
         --title "PEGASUS FRONTEND COMMAND MANAGER" \
         --menu "please make a selection." 15 52 18 \
-		S "Set an emulator for a system." \
+		D "Set the default emulator for a system." \
+		G "Set an emulator for a specific game." \
         M "Review commands for all platforms." \
         W "Write all commands to metadata_pegasus.txt." \
         Q "Quit." 2>"${INPUT}"
@@ -207,18 +236,21 @@ while true; do
 
         case $SELECTION in
 
+				D) 
+					set_cores 0
+					;;
 
-				S) 
-					echo "\n" # some code will go here
+				G)
+					set_cores 1
 					;;
 
 				M)
-					dialog --msgbox "$(show_cmds)" 0 0;  
+					dialog --msgbox "$(get_cmds)" 0 0;  
 					;;
 
                 Q)  
 					clear
-					echo "later..."
+					echo "have a nice day..."
 					break
 					;;
 
