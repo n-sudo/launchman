@@ -116,6 +116,7 @@ set_cores()
 
 		else 
 	
+			# display the help message
 			dialog --yesno $MSG2 6 30 
 	
 		fi
