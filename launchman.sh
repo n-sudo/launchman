@@ -11,7 +11,7 @@ trap "rm $OUTPUT; rm $INPUT; exit" SIGHUP SIGINT SIGTERM
 declare ROM_PATH="/home/$USER/Games/roms"
 declare CMD_PATH="/home/$USER/Games/emulator_files/cores.txt"
 declare LR_PATH="/home/$USER/.config/retroarch"
-declare -a ALL_CORES=$(ls --quoting-style=shell "$LR_PATH"/cores/*.so);
+declare -a ALL_CORES=$(ls "$LR_PATH"/cores/*.so);
 declare -a DIR=(`cat $CMD_PATH | cut -d':' -f 1`)
 declare -A SYS_ID
 declare -a CMD=(`cat $CMD_PATH | cut -d':' -f 3`); 
@@ -22,7 +22,8 @@ declare MSG1="This script was designed to make Pegasus emulator configuration mo
  rather than having to configure the metadata file by hand, this script will present a list of \
  retroarch cores and emulators for a given system. "
 # the help message
-declare MSG2=""
+declare MSG2="no cores were found for this platform. this happens from time to time. Would you \
+like to enter a custom command instead? "
 
 # loads the retroarch platform id into an associative array
 # that uses rom directory names as parameters
@@ -115,7 +116,7 @@ set_cores()
 
 		else 
 	
-			dialog --msgbox "No command set." 6 30 
+			dialog --yesno $MSG2 6 30 
 	
 		fi
 
@@ -143,23 +144,9 @@ get_cores()
         fi
 
 	done
+
     # print out whatever cores were found
 	echo ${PLAT_CORES[@]}; 
-
-}
-
-get_games()
-{
-
-	local N=0
-
-	for I in $(ls --quoting-style=shell-escape-always $ROM_PATH/$1); do 
-
-		echo -e "$I\n"
-
-	done
-	
-	echo ${GAMES[@]}
 
 }
 
