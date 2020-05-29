@@ -13,9 +13,9 @@ OUTPUT=/tmp/output.sh.$$
 trap "rm $OUTPUT; rm $INPUT; exit" SIGHUP SIGINT SIGTERM
 
 ## DEFAULT FILE LOCATIONS ##
-declare MD_PATH="/home/nate/Games/roms"
-declare CMD_PATH="/home/nate/Games/emulator_files/cores.txt"
-declare LR_PATH="/home/nate/.config/retroarch"
+declare MD_PATH="/home/$USER/Games/roms"
+declare CMD_PATH="/home/$USER/Games/emulator_files/cores.txt"
+declare LR_PATH="/home/$USER/.config/retroarch"
 declare -a ALL_CORES=$(ls "$LR_PATH"/cores/*.so); 
 declare PLATFORM="none"
 declare CORE="none"
@@ -87,7 +87,7 @@ menu()
 set_cores()
 {
 
-	echo "lol, nothing here yet"
+	echo "not quite ready"
 
 #                P)
 #					menu "PLATFORM" \
@@ -145,7 +145,7 @@ show_cmds()
         if [[ "${CMD[$I]}" != '---' ]]; then
             
             # print the platform and the command being set. 
-			printf "%s: %s\n" "${DIR[$I]}" "${CMD[$I]}" | sed 's/\/home\/nate\//~\//'
+			printf "%s: %s\n" "${DIR[$I]}" "${CMD[$I]}" | sed 's/\/home\/'$USER'\//~\//'
                     
         else
     
