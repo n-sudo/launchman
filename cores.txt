@@ -1,0 +1,17 @@
+3ds:3ds:citra "{file.path}" 
+gb:game_boy:retroarch --fullscreen -L /home/nate/.config/retroarch/cores/gearboy_libretro.so "{file.path}"
+gba:game_boy_advance:retroarch --fullscreen -L /home/nate/.config/retroarch/cores/mgba_libretro.so "{file.path}"
+gbc:game_boy_color:retroarch --fullscreen -L /home/nate/.config/retroarch/cores/gambatte_libretro.so "{file.path}"
+gc:gamecube:dolpin-emu -b -e "{file.path}"
+genesis:genesis:retroarch --fullscreen -L /home/nate/.config/retroarch/cores/genesis_plus_gx_libretro.so "{file.path}"
+mame-libretro:mame:retroarch --fullscreen -L /home/nate/.config/retroarch/cores/mame2003_plus_libretro.so "{file.path}"
+nds:nds:retroarch --fullscreen -L /home/nate/.config/retroarch/cores/desmume_libretro.so "{file.path}"
+neogeo:fb_alpha:retroarch --fullscreen -L /home/nate/.config/retroarch/cores/fbneo_libretro.so "{file.path}"
+nes:nes:retroarch --fullscreen -L /home/nate/.config/retroarch/cores/fceumm_libretro.so "{file.path}"
+pcengine:pc_engine:retroarch --fullscreen -L /home/nate/.config/retroarch/cores/mednafen_supergrafx_libretro.so "{file.path}"
+ps2:ps2:PCSX2 --nogui "{file.path}"
+ps3:---:---
+psx:psx:retroarch --fullscreen -L /home/nate/.config/retroarch/cores/pcsx_rearmed_libretro.so "{file.path}"
+snes:super_nes:retroarch --fullscreen -L /home/nate/.config/retroarch/cores/snes9x_libretro.so "{file.path}"
+wii:gamecube:dolphin -b -e "{file.path}"
+wiiu:---:---
