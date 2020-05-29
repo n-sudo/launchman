@@ -73,12 +73,27 @@ menu()
 
 }
 
+#changes the command stored in cores.txt
+write_to_file()
+{
+
+	local PLAT=$1
+	local CORE=$2
+	local GAME=$3
+
+	echo "$1:$2:$3"
+
+	sleep 3
+
+}
+
 # menu function for setting a system's core or emulator. 
 set_cores()
 {
 
 	local PLATFORM="none"
 	local CORE="none"
+	local GAME="default"
 	local game_specific=$1
 
 	menu "PLATFORM" \
@@ -90,38 +105,40 @@ set_cores()
 
 		if [[ $game_specific -ne 0 ]]; then
 
-			GAMES=($(ls $ROM_PATH/$PLATFORM))
+			GAMES=($(ls --quoting-style=shell-escape-always $ROM_PATH/$PLATFORM))
 
-			echo ${GAMES[@]}
-
-			sleep 3
-
-			local GAME="none"
+			GAME='none'
 
 			menu "GAME" \
 				 "GAME SELECTION" \
 				 "please select the game to configure:" \
-				 ${GAMES[@]}
+				 ${GAMES[@]} 
 
 		fi
 		
-		eval "local -a CORES=($(get_cores $PLATFORM))"
+		if [[ $game_specific -eq 0 || $GAME != 'none' ]]; then 
 
-		if [[ ${#CORES[@]} -gt 0 ]]; then 
+			eval "local -a CORES=($(get_cores $PLATFORM))"
 
-			menu "CORE" \
-				"EMULATOR SELECTION" \
-				"select a default emulator for $PLATFORM:" \
-				${CORES[@]}
+			if [[ ${#CORES[@]} -gt 0 ]]; then 
 
-		else 
+				menu "CORE" \
+					"EMULATOR SELECTION" \
+					"select a default emulator for $PLATFORM:" \
+					${CORES[@]}
+
+			else 
 	
-			# display the help message
-			dialog --yesno $MSG2 6 30 
+				# display the help message
+				dialog --yesno $MSG2 6 30 
 	
+			fi
+
 		fi
 
 	fi
+
+	write_to_file $PLATFORM $CORE $GAME
 	
 }
 
@@ -234,6 +251,10 @@ while true; do
 
 				M)
 					dialog --msgbox "$(get_cmds)" 0 0;  
+					;;
+
+				W)
+					echo "not ready yet"
 					;;
 
                 Q)  
